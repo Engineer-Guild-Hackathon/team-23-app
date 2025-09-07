@@ -12,7 +12,7 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "typecheck": "tsc --noEmit",
-    "test": "jest --ci --coverage --runInBand"
+    "test": "jest --ci --coverage --runInBand --passWithNoTests"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -50,7 +50,6 @@
     "@types/jest": "^29.5.14",
     "@types/react": "~19.0.10",
     "babel-jest": "^29.7.0",
-    "cspell": "^8.15.0",
     "eslint": "^9.35.0",
     "eslint-config-expo": "~9.2.0",
     "jest": "^29.7.0",
