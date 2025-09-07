@@ -6,7 +6,7 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "types": ["expo-router"]
+    "types": ["expo-router", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
