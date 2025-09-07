@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": ["tsunagite", "Expo", "Firebase", "nent"],
+  "ignorePaths": ["node_modules", "dist", ".expo", "coverage"]
+}
