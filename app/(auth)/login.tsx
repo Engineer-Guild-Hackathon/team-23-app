@@ -1,8 +1,8 @@
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
 import { useState } from 'react';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { auth } from '../../firebase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ export default function Login() {
       style={{
         flex: 1,
         justifyContent: 'center', // 縦方向の中央寄せ
-        alignItems: 'center',     // 横方向の中央寄せ
+        alignItems: 'center', // 横方向の中央寄せ
         padding: 24,
       }}
     >
@@ -68,4 +68,3 @@ export default function Login() {
     </View>
   );
 }
-
