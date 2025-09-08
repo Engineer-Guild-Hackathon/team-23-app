@@ -1,4 +1,4 @@
-import { Stack, Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../_layout';
 
 export default function AppLayout() {

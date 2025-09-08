@@ -1,105 +1,78 @@
-import { View, Text, Pressable, TextInput, Alert } from 'react-native';
-import { useState } from 'react';
-import { useAuth } from '../_layout';
-import { db } from '../../firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Redirect } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import { useAuth } from '../_layout';
 
-export default function Onboarding() {
+export default function OnboardingIndex() {
   const { user } = useAuth();
-  const [role, setRole] = useState<'senior' | 'org'>('senior');
-  const [bio, setBio] = useState('');
-  const [skills, setSkills] = useState(''); // カンマ区切り
-  const [saving, setSaving] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
-  if (!user) return <Redirect href="/(auth)/login" />;
+  console.log('OnboardingIndex - User:', user);
 
-  const onSave = async () => {
-    try {
-      setSaving(true);
-      await setDoc(
-        doc(db, 'users', user.uid),
-        {
-          role,
-          profile: {
-            bio,
-            skills: skills
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean),
-          },
-          onboardingDone: true,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
-    } catch (e: any) {
-      Alert.alert('保存失敗', e.message);
-    } finally {
-      setSaving(false);
-    }
-  };
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!user) {
+        console.log('OnboardingIndex - No user, stopping check');
+        setChecking(false);
+        return;
+      }
 
-  return (
-    <View style={{ padding: 24, gap: 16 }}>
-      <Text style={{ fontSize: 22, fontWeight: '700' }}>初回設定</Text>
+      console.log('OnboardingIndex - Checking for onboarding status...');
+      try {
+        // users/{uid} の onboardingDone フラグで判定（ルートレイアウトと一致）
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        if (!mounted) return;
 
-      <Text style={{ fontWeight: '600' }}>役割を選択</Text>
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <Pressable
-          onPress={() => setRole('senior')}
-          style={{
-            padding: 12,
-            borderWidth: 1,
-            borderRadius: 8,
-            backgroundColor: role === 'senior' ? '#eee' : 'transparent',
-          }}
-        >
-          <Text>シニア</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setRole('org')}
-          style={{
-            padding: 12,
-            borderWidth: 1,
-            borderRadius: 8,
-            backgroundColor: role === 'org' ? '#eee' : 'transparent',
-          }}
-        >
-          <Text>自治体/教育機関</Text>
-        </Pressable>
+        const userData = userSnap.data();
+        const onboardingDone = userData?.onboardingDone === true;
+
+        console.log('OnboardingIndex - User data:', userData);
+        console.log('OnboardingIndex - Onboarding done:', onboardingDone);
+        setOnboardingDone(onboardingDone);
+        setChecking(false);
+      } catch (error) {
+        console.error(
+          'OnboardingIndex - Error checking onboarding status:',
+          error,
+        );
+        setChecking(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  // 未ログインならログインへ
+  if (!user) {
+    console.log('OnboardingIndex - No user, redirecting to login');
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  // 判定中は何も出さない（スプラッシュでもOK）
+  if (checking) {
+    console.log('OnboardingIndex - Still checking, showing loading');
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>アカウント状態を確認中...</Text>
       </View>
+    );
+  }
 
-      <Text style={{ fontWeight: '600' }}>自己紹介</Text>
-      <TextInput
-        placeholder="これまでの経験、得意なことなど"
-        value={bio}
-        onChangeText={setBio}
-        multiline
-        style={{ borderWidth: 1, borderRadius: 8, padding: 12, minHeight: 80 }}
-      />
+  // オンボーディング未完了 → プロフィール入力へ
+  if (!onboardingDone) {
+    console.log(
+      'OnboardingIndex - Onboarding not done, redirecting to profile creation',
+    );
+    return <Redirect href="/(onboarding)/profile" />;
+  }
 
-      <Text style={{ fontWeight: '600' }}>スキル（カンマ区切り）</Text>
-      <TextInput
-        placeholder="例: 木工, 読み聞かせ, 料理"
-        value={skills}
-        onChangeText={setSkills}
-        style={{ borderWidth: 1, borderRadius: 8, padding: 12 }}
-      />
-
-      <Pressable
-        onPress={onSave}
-        style={{
-          backgroundColor: '#111',
-          padding: 14,
-          borderRadius: 10,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>
-          {saving ? '保存中…' : '完了する'}
-        </Text>
-      </Pressable>
-    </View>
-  );
+  // オンボーディング完了 → アプリ本体へ
+  console.log('OnboardingIndex - Onboarding complete, redirecting to app');
+  return <Redirect href="/(app)" />;
 }
