@@ -1,9 +1,9 @@
+import { auth, db } from '@/lib/firebase';
 import { Stack } from 'expo-router';
-import { useEffect, useState, createContext, useContext } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { View, ActivityIndicator } from 'react-native';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 interface AppUser {
   uid: string;
@@ -24,22 +24,44 @@ export default function RootLayout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Setting up auth state listener...');
     const unsub = onAuthStateChanged(auth, async (u: User | null) => {
+      console.log(
+        'Auth state changed:',
+        u ? 'User logged in' : 'User logged out',
+      );
+
       if (!u) {
+        console.log('No user, setting user to null');
         setUser(null);
         setLoading(false);
         return;
       }
 
-      const snap = await getDoc(doc(db, 'users', u.uid));
-      const data = snap.exists() ? snap.data() : {};
-      setUser({
-        uid: u.uid,
-        email: u.email,
-        role: (data.role as AppUser['role']) ?? undefined,
-        onboardingDone: Boolean(data.onboardingDone),
-      });
-      setLoading(false);
+      console.log('User UID:', u.uid);
+      console.log('Fetching user data from users collection...');
+
+      try {
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        console.log('User document exists:', snap.exists());
+
+        const data = snap.exists() ? snap.data() : {};
+        console.log('User data:', data);
+
+        const userData = {
+          uid: u.uid,
+          email: u.email,
+          role: (data.role as AppUser['role']) ?? undefined,
+          onboardingDone: Boolean(data.onboardingDone),
+        };
+
+        console.log('Setting user state:', userData);
+        setUser(userData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
     });
     return () => unsub();
   }, []);

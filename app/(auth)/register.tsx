@@ -1,8 +1,8 @@
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
+import { auth, db } from '@/lib/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -21,7 +21,7 @@ export default function Register() {
       await updateProfile(cred.user, { displayName });
       // 初期ユーザードキュメント作成（onboarding未完了）
       await setDoc(
-        doc(db, 'users', cred.user.uid),
+        doc(db, 'profiles', cred.user.uid),
         {
           email: cred.user.email,
           displayName,

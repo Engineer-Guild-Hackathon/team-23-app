@@ -1,8 +1,8 @@
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
+import { auth } from '@/lib/firebase';
 import { Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
 import { useState } from 'react';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,9 +12,36 @@ export default function Login() {
   const onLogin = async () => {
     try {
       setLoading(true);
+      console.log('Attempting login...');
+
+      // ネットワーク接続テスト
+      console.log('Testing network connectivity...');
+      try {
+        const response = await fetch('https://www.google.com', {
+          method: 'HEAD',
+        });
+        console.log(
+          'Network test result:',
+          response.ok ? 'Connected' : 'Failed',
+        );
+      } catch (netError) {
+        console.log('Network test failed:', netError);
+      }
+
+      // Firebase接続テスト（機密情報は出力しない）
+      console.log('Testing Firebase connection...');
+      console.log('Auth instance available:', !!auth);
+      console.log('Auth app available:', !!auth?.app);
+
       await signInWithEmailAndPassword(auth, email.trim(), password);
+      console.log('Login successful');
     } catch (e: any) {
-      Alert.alert('ログイン失敗', e.message);
+      console.error('Login error code:', e.code);
+      console.error('Login error message:', e.message);
+      Alert.alert(
+        'ログイン失敗',
+        `エラーコード: ${e.code}\nメッセージ: ${e.message}`,
+      );
     } finally {
       setLoading(false);
     }
