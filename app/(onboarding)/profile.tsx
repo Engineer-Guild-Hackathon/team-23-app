@@ -1,5 +1,6 @@
 import { Chips } from '@/components/Chips';
 import { auth, db } from '@/lib/firebase';
+import { Gender } from '@/lib/types';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useRouter } from 'expo-router';
 import { Timestamp, doc, serverTimestamp, setDoc } from 'firebase/firestore';
@@ -15,7 +16,6 @@ import {
   View,
 } from 'react-native';
 
-type Gender = 'male' | 'female' | 'other' | 'no_answer';
 const HOBBIES = ['料理', 'スポーツ', '手芸', '音楽', '旅行', '読書'];
 const SKILLS = ['ピアノ', '英語', 'IT', '農業', '木工', '子ども対応'];
 
@@ -86,11 +86,25 @@ export default function ProfileScreen() {
       return;
     }
     try {
+      console.log('Saving senior profile...');
+
       // プロフィール情報を保存
       await setDoc(
         doc(db, 'profiles', uid),
         {
           uid,
+          role: 'senior',
+          name: nickname, // senior の場合は nickname が name になる
+          area: { pref, city },
+          bio,
+          seniorProfile: {
+            nickname,
+            gender,
+            birthDate: `${birthYear}-${birthMonth}-${birthDay}`,
+            hobbies,
+            skills: [...skills, ...(skillFree ? [skillFree] : [])],
+          },
+          // 互換性のため既存フィールドも保持（将来的に削除予定）
           nickname,
           gender,
           birthDate: `${birthYear}-${birthMonth}-${birthDay}`,
@@ -101,10 +115,8 @@ export default function ProfileScreen() {
               Number(birthDay),
             ),
           ),
-          bio,
           hobbies,
           skills: [...skills, ...(skillFree ? [skillFree] : [])],
-          area: { pref, city },
           // photoUrl は後日 Storage で
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
