@@ -18,29 +18,16 @@ export default function RootLayout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Setting up auth state listener...');
     const unsub = onAuthStateChanged(auth, async (u: User | null) => {
-      console.log(
-        'Auth state changed:',
-        u ? 'User logged in' : 'User logged out',
-      );
-
       if (!u) {
-        console.log('No user, setting user to null');
         setUser(null);
         setLoading(false);
         return;
       }
 
-      console.log('User UID:', u.uid);
-      console.log('Fetching user data from users collection...');
-
       try {
         const snap = await getDoc(doc(db, 'users', u.uid));
-        console.log('User document exists:', snap.exists());
-
         const data = snap.exists() ? snap.data() : {};
-        console.log('User data:', data);
 
         const userData: AppUser = {
           uid: u.uid,
@@ -49,7 +36,6 @@ export default function RootLayout() {
           onboardingDone: Boolean(data.onboardingDone),
         };
 
-        console.log('Setting user state:', userData);
         setUser(userData);
         setLoading(false);
       } catch (error) {
