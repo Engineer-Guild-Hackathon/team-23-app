@@ -46,7 +46,7 @@ export default function EventDetailScreen() {
     };
 
     fetchEvent();
-  }, [id]);
+  }, [id, router]);
 
   const getGenderLabel = (gender: Gender) => {
     switch (gender) {
