@@ -129,14 +129,20 @@ export default function ProfileScreen() {
       await setDoc(
         doc(db, 'users', uid),
         {
+          role: 'senior',
           onboardingDone: true,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
 
+      console.log('Senior profile saved successfully');
       Alert.alert('プロフィールを保存しました');
-      router.replace('/(app)'); // 完了後にメインタブ等へ
+
+      // ユーザー状態の更新を待つ
+      setTimeout(() => {
+        router.replace('/(app)');
+      }, 500);
     } catch (e: any) {
       Alert.alert('保存に失敗しました', String(e?.message ?? e));
     }

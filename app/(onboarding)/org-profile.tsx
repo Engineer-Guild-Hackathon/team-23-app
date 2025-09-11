@@ -113,18 +113,24 @@ export default function OrgProfileScreen() {
         { merge: true },
       );
 
-      // オンボーディング完了フラグを更新
+      // オンボーディング完了フラグとroleを更新
       await setDoc(
         doc(db, 'users', uid),
         {
+          role: 'org',
           onboardingDone: true,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
 
+      console.log('Org profile saved successfully');
       Alert.alert('組織プロフィールを保存しました');
-      router.replace('/(app)');
+
+      // ユーザー状態の更新を待つ
+      setTimeout(() => {
+        router.replace('/(app)');
+      }, 500);
     } catch (e: any) {
       console.error('Error saving org profile:', e);
       Alert.alert('保存に失敗しました', String(e?.message ?? e));
