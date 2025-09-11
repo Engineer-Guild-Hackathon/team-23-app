@@ -8,6 +8,7 @@ import { useAuth } from '../_layout';
 export default function OnboardingIndex() {
   const { user } = useAuth();
   const [checking, setChecking] = useState(true);
+  const [hasRole, setHasRole] = useState<boolean | null>(null);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
   console.log('OnboardingIndex - User:', user);
@@ -21,24 +22,25 @@ export default function OnboardingIndex() {
         return;
       }
 
-      console.log('OnboardingIndex - Checking for onboarding status...');
+      console.log('OnboardingIndex - Checking user status...');
       try {
-        // users/{uid} の onboardingDone フラグで判定（ルートレイアウトと一致）
+        // users/{uid} の情報をチェック
         const userSnap = await getDoc(doc(db, 'users', user.uid));
         if (!mounted) return;
 
         const userData = userSnap.data();
+        const hasRole = !!userData?.role;
         const onboardingDone = userData?.onboardingDone === true;
 
         console.log('OnboardingIndex - User data:', userData);
+        console.log('OnboardingIndex - Has role:', hasRole);
         console.log('OnboardingIndex - Onboarding done:', onboardingDone);
+
+        setHasRole(hasRole);
         setOnboardingDone(onboardingDone);
         setChecking(false);
       } catch (error) {
-        console.error(
-          'OnboardingIndex - Error checking onboarding status:',
-          error,
-        );
+        console.error('OnboardingIndex - Error checking user status:', error);
         setChecking(false);
       }
     };
@@ -64,12 +66,23 @@ export default function OnboardingIndex() {
     );
   }
 
-  // オンボーディング未完了 → プロフィール入力へ
+  // 役割未設定 → 役割選択へ
+  if (!hasRole) {
+    console.log('OnboardingIndex - No role set, redirecting to role selection');
+    return <Redirect href="/(onboarding)/role-select" />;
+  }
+
+  // オンボーディング未完了 → 役割に応じたプロフィール作成へ
   if (!onboardingDone) {
+    const profileUrl =
+      user?.role === 'senior'
+        ? '/(onboarding)/profile'
+        : '/(onboarding)/org-profile';
     console.log(
-      'OnboardingIndex - Onboarding not done, redirecting to profile creation',
+      'OnboardingIndex - Onboarding not done, redirecting to:',
+      profileUrl,
     );
-    return <Redirect href="/(onboarding)/profile" />;
+    return <Redirect href={profileUrl} />;
   }
 
   // オンボーディング完了 → アプリ本体へ

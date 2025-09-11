@@ -1,16 +1,10 @@
 import { auth, db } from '@/lib/firebase';
+import { AppUser } from '@/lib/types';
 import { Stack } from 'expo-router';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-
-interface AppUser {
-  uid: string;
-  email: string | null;
-  role?: 'senior' | 'org' | 'admin';
-  onboardingDone?: boolean;
-}
 
 const AuthContext = createContext<{
   user: AppUser | null;
@@ -48,7 +42,7 @@ export default function RootLayout() {
         const data = snap.exists() ? snap.data() : {};
         console.log('User data:', data);
 
-        const userData = {
+        const userData: AppUser = {
           uid: u.uid,
           email: u.email,
           role: (data.role as AppUser['role']) ?? undefined,
