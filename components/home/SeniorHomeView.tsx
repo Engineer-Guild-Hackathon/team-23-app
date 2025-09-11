@@ -1,4 +1,5 @@
 import { Profile } from '@/lib/types';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActionCard } from './ActionCard';
@@ -10,6 +11,7 @@ interface SeniorHomeViewProps {
 }
 
 export const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
+  const router = useRouter();
   return (
     <ScrollView
       style={styles.container}
@@ -59,7 +61,7 @@ export const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
             title="活動を探す"
             description="あなたに合った活動を見つけましょう"
             icon="🔍"
-            onPress={() => console.log('活動検索')}
+            onPress={() => router.push('/(app)/events')}
             color="#059669"
           />
           <ActionCard
@@ -115,7 +117,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
+    paddingTop: 50,
   },
   welcomeSection: {
     backgroundColor: '#f0f9ff',

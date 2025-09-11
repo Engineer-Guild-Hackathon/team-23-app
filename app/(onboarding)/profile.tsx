@@ -15,12 +15,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '../_layout';
 
 const HOBBIES = ['料理', 'スポーツ', '手芸', '音楽', '旅行', '読書'];
 const SKILLS = ['ピアノ', '英語', 'IT', '農業', '木工', '子ども対応'];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [showGenderModal, setShowGenderModal] = useState(false);
 
@@ -137,12 +139,12 @@ export default function ProfileScreen() {
       );
 
       console.log('Senior profile saved successfully');
-      Alert.alert('プロフィールを保存しました');
 
-      // ユーザー状態の更新を待つ
-      setTimeout(() => {
-        router.replace('/(app)');
-      }, 500);
+      // ユーザー状態を即座に更新
+      await refreshUser();
+
+      Alert.alert('プロフィールを保存しました');
+      router.replace('/(app)');
     } catch (e: any) {
       Alert.alert('保存に失敗しました', String(e?.message ?? e));
     }
@@ -327,12 +329,15 @@ export default function ProfileScreen() {
             <Summary
               label="性別"
               value={
-                {
-                  male: '男性',
-                  female: '女性',
-                  other: 'その他',
-                  no_answer: '回答しない',
-                }[gender]
+                gender === 'male'
+                  ? '男性'
+                  : gender === 'female'
+                    ? '女性'
+                    : gender === 'other'
+                      ? 'その他'
+                      : gender === 'no_answer'
+                        ? '回答しない'
+                        : '未選択'
               }
             />
             <Summary

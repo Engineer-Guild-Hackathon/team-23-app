@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '../_layout';
 
 const ORG_TYPES = ['education', 'government', 'npo', 'company'] as const;
 const ORG_TYPE_LABELS = {
@@ -41,6 +42,7 @@ const TARGET_AUDIENCE = [
 
 export default function OrgProfileScreen() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [showOrgTypeModal, setShowOrgTypeModal] = useState(false);
 
@@ -125,12 +127,12 @@ export default function OrgProfileScreen() {
       );
 
       console.log('Org profile saved successfully');
-      Alert.alert('組織プロフィールを保存しました');
 
-      // ユーザー状態の更新を待つ
-      setTimeout(() => {
-        router.replace('/(app)');
-      }, 500);
+      // ユーザー状態を即座に更新
+      await refreshUser();
+
+      Alert.alert('組織プロフィールを保存しました');
+      router.replace('/(app)');
     } catch (e: any) {
       console.error('Error saving org profile:', e);
       Alert.alert('保存に失敗しました', String(e?.message ?? e));

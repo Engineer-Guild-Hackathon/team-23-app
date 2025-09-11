@@ -3,9 +3,18 @@ import { Timestamp } from 'firebase/firestore';
 
 export type UserRole = 'senior' | 'org';
 
-export type Gender = 'male' | 'female' | 'other' | 'no_answer';
+export type Gender = 'male' | 'female' | 'other' | 'no_answer' | 'any';
 
 export type OrgType = 'education' | 'government' | 'npo' | 'company';
+
+export type AgeGroup = '50代' | '60代' | '70代' | '80代以上';
+
+export type ITLevel =
+  | '初心者'
+  | '基礎レベル'
+  | '中級レベル'
+  | '上級レベル'
+  | '不問';
 
 export interface SeniorProfileData {
   nickname: string;
@@ -47,4 +56,25 @@ export interface AppUser {
   email: string | null;
   role?: UserRole;
   onboardingDone?: boolean;
+}
+
+export interface EventPost {
+  id: string;
+  organizerId: string;
+  organizationName: string;
+  title: string;
+  description: string;
+  area: {
+    pref: string;
+    city: string;
+  };
+  targetGender: Gender;
+  requiredSkills: string[];
+  targetAgeGroups: AgeGroup[];
+  itLevel: ITLevel;
+  eventDate: Timestamp; // 開催日時
+  eventEndDate?: Timestamp; // 終了日時（オプション）
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  isActive: boolean;
 }
