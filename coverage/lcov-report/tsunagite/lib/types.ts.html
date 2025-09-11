@@ -179,10 +179,10 @@ export interface SeniorProfileData {
 export interface OrgProfileData {
   organizationName: string;
   organizationType: OrgType;
-  establishedYear?: number;
-  websiteUrl?: string;
+  establishedYear?: number | null;
+  websiteUrl?: string | null;
   contactEmail: string;
-  contactPhone?: string;
+  contactPhone?: string | null;
   services: string[];
   targetAudience: string[];
 }
@@ -194,10 +194,10 @@ export interface Profile {
   area: { pref: string; city: string };
   bio?: string;
   photoUrl?: string;
-  
+&nbsp;
   seniorProfile?: SeniorProfileData;
   orgProfile?: OrgProfileData;
-  
+&nbsp;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   version: number;
@@ -223,7 +223,7 @@ export interface AppUser {
         rel="noopener noreferrer"
         >istanbul</a
       >
-      at 2025-09-11T05:45:37.638Z
+      at 2025-09-11T06:09:22.618Z
     </div>
     <script src="../../prettify.js"></script>
     <script>
