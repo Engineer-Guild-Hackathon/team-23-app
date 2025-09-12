@@ -181,7 +181,10 @@ export default function CreateEventScreen() {
 
       const eventData = {
         organizerId: uid,
-        organizationName: profile.orgProfile?.organizationName || profile.name,
+        organizationName:
+          profile.role === 'org'
+            ? profile.orgProfile?.organizationName || profile.name
+            : profile.name,
         title: title.trim(),
         description: description.trim(),
         area: { pref, city: city.trim() },
@@ -193,6 +196,7 @@ export default function CreateEventScreen() {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         isActive: true,
+        createdByRole: profile.role, // シニアか組織かを記録
       };
 
       await addDoc(collection(db, 'events'), eventData);

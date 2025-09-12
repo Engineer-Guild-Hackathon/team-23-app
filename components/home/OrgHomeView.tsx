@@ -2,9 +2,11 @@ import { auth, db } from '@/lib/firebase';
 import { EventPost, Profile } from '@/lib/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -79,6 +81,25 @@ export const OrgHomeView: React.FC<OrgHomeViewProps> = ({ profile }) => {
       fetchEventCount();
     }, []),
   );
+
+  const handleLogout = () => {
+    Alert.alert('ログアウト', 'ログアウトしますか？', [
+      { text: 'キャンセル', style: 'cancel' },
+      {
+        text: 'ログアウト',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut(auth);
+            router.replace('/(auth)/login');
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('エラー', 'ログアウトに失敗しました。');
+          }
+        },
+      },
+    ]);
+  };
 
   const getOrgTypeLabel = (orgType?: string) => {
     switch (orgType) {
@@ -166,15 +187,22 @@ export const OrgHomeView: React.FC<OrgHomeViewProps> = ({ profile }) => {
             color="#059669"
           />
           <ActionCard
-            title="イベント一覧"
-            description="投稿されたイベントを確認"
+            title="申込み管理"
+            description="参加申込みを確認・承認"
             icon="📋"
-            onPress={() => router.push('/(app)/events')}
+            onPress={() => router.push('/(app)/applications')}
             color="#7c3aed"
           />
         </ActionGrid>
         <View style={{ height: 8 }} />
         <ActionGrid>
+          <ActionCard
+            title="イベント一覧"
+            description="投稿されたイベントを確認"
+            icon="📝"
+            onPress={() => router.push('/(app)/events')}
+            color="#f59e0b"
+          />
           <ActionCard
             title="シニア検索"
             description="適切な人材を探す"
@@ -182,12 +210,22 @@ export const OrgHomeView: React.FC<OrgHomeViewProps> = ({ profile }) => {
             onPress={() => console.log('シニア検索')}
             color="#dc2626"
           />
+        </ActionGrid>
+        <View style={{ height: 8 }} />
+        <ActionGrid>
           <ActionCard
             title="分析レポート"
             description="活動成果を確認"
             icon="📊"
             onPress={() => console.log('分析レポート')}
-            color="#f59e0b"
+            color="#6366f1"
+          />
+          <ActionCard
+            title="ログアウト"
+            description="アプリからログアウト"
+            icon="🚪"
+            onPress={handleLogout}
+            color="#ef4444"
           />
         </ActionGrid>
       </Section>

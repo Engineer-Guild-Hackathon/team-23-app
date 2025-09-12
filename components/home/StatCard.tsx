@@ -1,22 +1,26 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface StatCardProps {
   title: string;
   value: string | number;
   color?: string;
+  onPress?: () => void;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   color = '#4f46e5',
+  onPress,
 }) => {
+  const CardComponent = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={styles.card}>
+    <CardComponent style={styles.card} onPress={onPress}>
       <Text style={[styles.value, { color }]}>{value}</Text>
       <Text style={styles.title}>{title}</Text>
-    </View>
+    </CardComponent>
   );
 };
 

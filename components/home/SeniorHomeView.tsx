@@ -1,17 +1,126 @@
+import { auth, db } from '@/lib/firebase';
 import { Profile } from '@/lib/types';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { signOut } from 'firebase/auth';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import React, { useCallback, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActionCard } from './ActionCard';
 import { ActionGrid } from './ActionGrid';
 import { Section } from './Section';
+import { StatCard } from './StatCard';
 
 interface SeniorHomeViewProps {
   profile: Profile;
 }
 
-export const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
+const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
   const router = useRouter();
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
+  const [myEventsStats, setMyEventsStats] = useState({
+    totalEvents: 0,
+    totalApplications: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchApplicationStats = useCallback(async () => {
+    if (!auth.currentUser) return;
+
+    try {
+      setIsLoading(true);
+
+      // 申し込み統計を取得
+      const applicationsRef = collection(db, 'applications');
+      const q = query(
+        applicationsRef,
+        where('applicantId', '==', auth.currentUser.uid),
+      );
+      const querySnapshot = await getDocs(q);
+
+      let total = 0;
+      let pending = 0;
+      let approved = 0;
+      let rejected = 0;
+
+      querySnapshot.forEach((doc) => {
+        const application = doc.data();
+        total++;
+
+        switch (application.status) {
+          case 'pending':
+            pending++;
+            break;
+          case 'approved':
+            approved++;
+            break;
+          case 'rejected':
+            rejected++;
+            break;
+        }
+      });
+
+      setStats({ total, pending, approved, rejected });
+
+      // 主催イベント統計を取得
+      const eventsRef = collection(db, 'events');
+      const eventsQuery = query(
+        eventsRef,
+        where('organizerId', '==', auth.currentUser.uid),
+        where('isActive', '==', true),
+      );
+      const eventsSnapshot = await getDocs(eventsQuery);
+
+      // 主催イベントへの申し込み数を取得
+      const applicationsToMyEventsQuery = query(
+        applicationsRef,
+        where('organizerId', '==', auth.currentUser.uid),
+      );
+      const applicationsToMyEventsSnapshot = await getDocs(
+        applicationsToMyEventsQuery,
+      );
+
+      setMyEventsStats({
+        totalEvents: eventsSnapshot.size,
+        totalApplications: applicationsToMyEventsSnapshot.size,
+      });
+    } catch (error) {
+      console.error('申し込み統計の取得に失敗しました:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchApplicationStats();
+    }, [fetchApplicationStats]),
+  );
+
+  const handleLogout = () => {
+    Alert.alert('ログアウト', 'ログアウトしますか？', [
+      { text: 'キャンセル', style: 'cancel' },
+      {
+        text: 'ログアウト',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut(auth);
+            router.replace('/(auth)/login');
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('エラー', 'ログアウトに失敗しました。');
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -40,18 +149,72 @@ export const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
             </Text>
           </View>
           <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>趣味:</Text>
+            <Text style={styles.profileLabel}>趣味・関心:</Text>
             <Text style={styles.profileValue}>
-              {profile.seniorProfile?.hobbies?.join('、') || '未設定'}
-            </Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>スキル:</Text>
-            <Text style={styles.profileValue}>
-              {profile.seniorProfile?.skills?.join('、') || '未設定'}
+              {profile.seniorProfile?.hobbies?.join(', ') || '未設定'}
             </Text>
           </View>
         </View>
+      </Section>
+
+      {/* 申し込み統計 */}
+      <Section title="申し込み状況">
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>読み込み中...</Text>
+          </View>
+        ) : (
+          <View style={styles.statsContainer}>
+            <StatCard
+              title="総申し込み数"
+              value={stats.total}
+              color="#6b7280"
+              onPress={() => router.push('/(app)/my-applications')}
+            />
+            <StatCard
+              title="承認待ち"
+              value={stats.pending}
+              color="#f59e0b"
+              onPress={() => router.push('/(app)/my-applications')}
+            />
+            <StatCard
+              title="承認済み"
+              value={stats.approved}
+              color="#10b981"
+              onPress={() => router.push('/(app)/my-applications')}
+            />
+            <StatCard
+              title="不承認"
+              value={stats.rejected}
+              color="#ef4444"
+              onPress={() => router.push('/(app)/my-applications')}
+            />
+          </View>
+        )}
+      </Section>
+
+      {/* 主催イベント統計 */}
+      <Section title="私のイベント状況">
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>読み込み中...</Text>
+          </View>
+        ) : (
+          <View style={styles.statsContainer}>
+            <StatCard
+              title="作成イベント数"
+              value={myEventsStats.totalEvents}
+              color="#8b5cf6"
+              onPress={() => router.push('/(app)/my-events')}
+            />
+            <StatCard
+              title="受けた申し込み"
+              value={myEventsStats.totalApplications}
+              color="#059669"
+              onPress={() => router.push('/(app)/my-events-applications')}
+            />
+          </View>
+        )}
       </Section>
 
       {/* クイックアクション */}
@@ -65,11 +228,38 @@ export const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
             color="#059669"
           />
           <ActionCard
-            title="組織を探す"
-            description="近くの組織をチェック"
-            icon="🏢"
-            onPress={() => console.log('組織検索')}
-            color="#7c3aed"
+            title="活動を作成"
+            description="新しい活動を企画・募集"
+            icon="�"
+            onPress={() => router.push('/(app)/create-event')}
+            color="#3b82f6"
+          />
+        </ActionGrid>
+        <View style={{ height: 8 }} />
+        <ActionGrid>
+          <ActionCard
+            title="私のイベント"
+            description="作成したイベントと申し込み管理"
+            icon="🏆"
+            onPress={() => router.push('/(app)/my-events')}
+            color="#8b5cf6"
+          />
+          <ActionCard
+            title="申し込み履歴"
+            description="過去の申し込み状況を確認"
+            icon="📋"
+            onPress={() => router.push('/(app)/my-applications')}
+            color="#f59e0b"
+          />
+        </ActionGrid>
+        <View style={{ height: 8 }} />
+        <ActionGrid>
+          <ActionCard
+            title="ログアウト"
+            description="アプリからログアウトします"
+            icon="🚪"
+            onPress={handleLogout}
+            color="#ef4444"
           />
         </ActionGrid>
       </Section>
@@ -211,4 +401,18 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
   },
+  statsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: -4,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
 });
+
+export default SeniorHomeView;

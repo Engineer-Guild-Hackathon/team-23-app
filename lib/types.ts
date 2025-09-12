@@ -77,4 +77,24 @@ export interface EventPost {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isActive: boolean;
+  createdByRole: UserRole; // イベント作成者の役割
+}
+
+export type ApplicationStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled';
+
+export interface EventApplication {
+  id: string;
+  eventId: string;
+  applicantId: string;
+  applicantName: string;
+  organizerId: string;
+  status: ApplicationStatus;
+  message?: string; // 申込み時のメッセージ
+  organizationResponse?: string; // 組織からの返答
+  appliedAt: Timestamp;
+  updatedAt: Timestamp;
 }
