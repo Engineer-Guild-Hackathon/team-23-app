@@ -14,6 +14,7 @@ describe('Types', () => {
       },
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+      version: 1,
     };
 
     expect(mockProfile).toBeDefined();
@@ -34,6 +35,7 @@ describe('Types', () => {
       },
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+      version: 1,
     };
 
     expect(minimalProfile).toBeDefined();
