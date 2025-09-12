@@ -64,15 +64,12 @@ export default function MyEventsApplicationsScreen() {
 
         // イベント情報を取得
         try {
-          const eventDoc = await getDocs(
-            query(
-              collection(db, 'events'),
-              where('__name__', '==', appData.eventId),
-            ),
+          const eventDoc = await getDoc(
+            doc(db, 'events', appData.eventId),
           );
 
-          if (!eventDoc.empty) {
-            const eventData = eventDoc.docs[0].data();
+          if (eventDoc.exists()) {
+            const eventData = eventDoc.data();
             appData.eventTitle = eventData.title;
           }
         } catch (error) {
