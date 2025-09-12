@@ -64,9 +64,7 @@ export default function MyEventsApplicationsScreen() {
 
         // イベント情報を取得
         try {
-          const eventDoc = await getDoc(
-            doc(db, 'events', appData.eventId),
-          );
+          const eventDoc = await getDoc(doc(db, 'events', appData.eventId));
 
           if (eventDoc.exists()) {
             const eventData = eventDoc.data();
