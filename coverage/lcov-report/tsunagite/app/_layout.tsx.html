@@ -25,7 +25,7 @@
           <div class="fl pad1y space-right2">
             <span class="strong">0% </span>
             <span class="quiet">Statements</span>
-            <span class="fraction">0/32</span>
+            <span class="fraction">0/31</span>
           </div>
 
           <div class="fl pad1y space-right2">
@@ -37,13 +37,13 @@
           <div class="fl pad1y space-right2">
             <span class="strong">0% </span>
             <span class="quiet">Functions</span>
-            <span class="fraction">0/5</span>
+            <span class="fraction">0/8</span>
           </div>
 
           <div class="fl pad1y space-right2">
             <span class="strong">0% </span>
             <span class="quiet">Lines</span>
-            <span class="fraction">0/30</span>
+            <span class="fraction">0/29</span>
           </div>
         </div>
         <p class="quiet">
@@ -134,8 +134,7 @@
 <a name='L73'></a><a href='#L73'>73</a>
 <a name='L74'></a><a href='#L74'>74</a>
 <a name='L75'></a><a href='#L75'>75</a>
-<a name='L76'></a><a href='#L76'>76</a>
-<a name='L77'></a><a href='#L77'>77</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L76'></a><a href='#L76'>76</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -148,6 +147,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -156,26 +156,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -188,11 +168,29 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -222,7 +220,8 @@ import { ActivityIndicator, View } from 'react-native';
 const AuthContext = <span class="cstat-no" title="statement not covered" >createContext&lt;{</span>
   user: AppUser | null;
   loading: boolean;
-}&gt;({ user: null, loading: true });
+  refreshUser: () =&gt; Promise&lt;void&gt;;
+}&gt;({ user: null, loading: true, refreshUser: <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {} });
 &nbsp;
 export const useAuth = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >useContext(AuthContext);</span></span>
 &nbsp;
@@ -230,45 +229,43 @@ export default function <span class="fstat-no" title="function not covered" >Roo
   const [user, setUser] = <span class="cstat-no" title="statement not covered" >useState&lt;AppUser | null&gt;(null);</span>
   const [loading, setLoading] = <span class="cstat-no" title="statement not covered" >useState(true);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    console.log('Setting up auth state listener...');</span>
-    const unsub = <span class="cstat-no" title="statement not covered" >onAuthStateChanged(auth, <span class="fstat-no" title="function not covered" >as</span>ync (u: User | null) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      console.log(</span>
-        'Auth state changed:',
-        u ? 'User logged in' : 'User logged out',
-      );
+  const fetchUserData = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (u: User) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+      const snap = <span class="cstat-no" title="statement not covered" >await getDoc(doc(db, 'users', u.uid));</span>
+      const data = <span class="cstat-no" title="statement not covered" >snap.exists() ? snap.data() : {};</span>
 &nbsp;
+      const userData: AppUser = <span class="cstat-no" title="statement not covered" >{</span>
+        uid: u.uid,
+        email: u.email,
+        role: (data.role as AppUser['role']) ?? undefined,
+        onboardingDone: Boolean(data.onboardingDone),
+      };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      setUser(userData);</span>
+<span class="cstat-no" title="statement not covered" >      return userData;</span>
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >      console.error('Error fetching user data:', error);</span>
+<span class="cstat-no" title="statement not covered" >      throw error;</span>
+    }
+  };
+&nbsp;
+  const refreshUser = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+    const currentUser = <span class="cstat-no" title="statement not covered" >auth.currentUser;</span>
+<span class="cstat-no" title="statement not covered" >    if (currentUser) {</span>
+<span class="cstat-no" title="statement not covered" >      await fetchUserData(currentUser);</span>
+    }
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+    const unsub = <span class="cstat-no" title="statement not covered" >onAuthStateChanged(auth, <span class="fstat-no" title="function not covered" >as</span>ync (u: User | null) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      if (!u) {</span>
-<span class="cstat-no" title="statement not covered" >        console.log('No user, setting user to null');</span>
 <span class="cstat-no" title="statement not covered" >        setUser(null);</span>
 <span class="cstat-no" title="statement not covered" >        setLoading(false);</span>
 <span class="cstat-no" title="statement not covered" >        return;</span>
       }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      console.log('User UID:', u.uid);</span>
-<span class="cstat-no" title="statement not covered" >      console.log('Fetching user data from users collection...');</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >      try {</span>
-        const snap = <span class="cstat-no" title="statement not covered" >await getDoc(doc(db, 'users', u.uid));</span>
-<span class="cstat-no" title="statement not covered" >        console.log('User document exists:', snap.exists());</span>
-&nbsp;
-        const data = <span class="cstat-no" title="statement not covered" >snap.exists() ? snap.data() : {};</span>
-<span class="cstat-no" title="statement not covered" >        console.log('User data:', data);</span>
-&nbsp;
-        const userData: AppUser = <span class="cstat-no" title="statement not covered" >{</span>
-          uid: u.uid,
-          email: u.email,
-          role: (data.role as AppUser['role']) ?? undefined,
-          onboardingDone: Boolean(data.onboardingDone),
-        };
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        console.log('Setting user state:', userData);</span>
-<span class="cstat-no" title="statement not covered" >        setUser(userData);</span>
-<span class="cstat-no" title="statement not covered" >        setLoading(false);</span>
-      } catch (error) {
-<span class="cstat-no" title="statement not covered" >        console.error('Error fetching user data:', error);</span>
-<span class="cstat-no" title="statement not covered" >        setLoading(false);</span>
-      }
+<span class="cstat-no" title="statement not covered" >      await fetchUserData(u);</span>
+<span class="cstat-no" title="statement not covered" >      setLoading(false);</span>
     });
 <span class="cstat-no" title="statement not covered" >    return <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >unsub();</span></span>
   }, []);
@@ -282,7 +279,7 @@ export default function <span class="fstat-no" title="function not covered" >Roo
   }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
-    &lt;AuthContext.Provider value={{ user, loading }}&gt;
+    &lt;AuthContext.Provider value={{ user, loading, refreshUser }}&gt;
       &lt;Stack screenOptions={{ headerShown: false }} /&gt;
     &lt;/AuthContext.Provider&gt;
   );
@@ -301,7 +298,7 @@ export default function <span class="fstat-no" title="function not covered" >Roo
         rel="noopener noreferrer"
         >istanbul</a
       >
-      at 2025-09-11T06:09:22.618Z
+      at 2025-09-12T08:47:49.533Z
     </div>
     <script src="../../prettify.js"></script>
     <script>

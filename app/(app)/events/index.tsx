@@ -102,8 +102,31 @@ export default function EventsScreen() {
     >
       <View style={styles.eventHeader}>
         <Text style={styles.eventTitle}>{event.title}</Text>
-        <View style={styles.organizationBadge}>
-          <Text style={styles.organizationName}>{event.organizationName}</Text>
+        <View style={styles.badgeContainer}>
+          <View
+            style={[
+              styles.roleBadge,
+              event.createdByRole === 'senior'
+                ? styles.seniorBadge
+                : styles.orgBadge,
+            ]}
+          >
+            <Text
+              style={[
+                styles.roleBadgeText,
+                event.createdByRole === 'senior'
+                  ? styles.seniorBadgeText
+                  : styles.orgBadgeText,
+              ]}
+            >
+              {event.createdByRole === 'senior' ? 'シニア主催' : '組織主催'}
+            </Text>
+          </View>
+          <View style={styles.organizationBadge}>
+            <Text style={styles.organizationName}>
+              {event.organizationName}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -379,5 +402,32 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  badgeContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  roleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    alignSelf: 'flex-end',
+  },
+  seniorBadge: {
+    backgroundColor: '#fef3c7',
+  },
+  orgBadge: {
+    backgroundColor: '#dbeafe',
+  },
+  roleBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  seniorBadgeText: {
+    color: '#92400e',
+  },
+  orgBadgeText: {
+    color: '#1e40af',
   },
 });

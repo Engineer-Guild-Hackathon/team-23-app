@@ -1,8 +1,23 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { auth, db } from '@/lib/firebase';
-import { EventPost, Gender, ITLevel } from '@/lib/types';
+import {
+  ApplicationStatus,
+  EventApplication,
+  EventPost,
+  Gender,
+  ITLevel,
+} from '@/lib/types';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  where,
+} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -20,6 +35,9 @@ export default function EventDetailScreen() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [event, setEvent] = useState<EventPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [applicationStatus, setApplicationStatus] =
+    useState<ApplicationStatus | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -33,6 +51,14 @@ export default function EventDetailScreen() {
             ...eventDoc.data(),
           } as EventPost;
           setEvent(eventData);
+
+          // 申込み状況をチェック
+          if (
+            auth.currentUser &&
+            auth.currentUser.uid !== eventData.organizerId
+          ) {
+            await checkApplicationStatus(id, auth.currentUser.uid);
+          }
         } else {
           Alert.alert('エラー', 'イベントが見つかりません。');
           router.back();
@@ -47,6 +73,25 @@ export default function EventDetailScreen() {
 
     fetchEvent();
   }, [id, router]);
+
+  const checkApplicationStatus = async (eventId: string, userId: string) => {
+    try {
+      const applicationsQuery = query(
+        collection(db, 'applications'),
+        where('eventId', '==', eventId),
+        where('applicantId', '==', userId),
+      );
+      const applicationsSnapshot = await getDocs(applicationsQuery);
+
+      if (!applicationsSnapshot.empty) {
+        const applicationData =
+          applicationsSnapshot.docs[0].data() as EventApplication;
+        setApplicationStatus(applicationData.status);
+      }
+    } catch (error) {
+      console.error('Error checking application status:', error);
+    }
+  };
 
   const getGenderLabel = (gender: Gender) => {
     switch (gender) {
@@ -95,13 +140,82 @@ export default function EventDetailScreen() {
     });
   };
 
-  const handleApply = () => {
-    // TODO: 申込み機能を実装
-    Alert.alert(
-      '申込み',
-      'この機能は今後実装予定です。\n直接組織にお問い合わせください。',
-      [{ text: 'OK' }],
-    );
+  const handleApply = async () => {
+    if (!auth.currentUser || !event) {
+      Alert.alert('エラー', 'ログインが必要です。');
+      return;
+    }
+
+    if (applicationStatus) {
+      Alert.alert('申込み済み', 'すでにこのイベントに申し込んでいます。');
+      return;
+    }
+
+    Alert.alert('イベント申込み', `「${event.title}」に申し込みますか？`, [
+      { text: 'キャンセル', style: 'cancel' },
+      {
+        text: '申し込む',
+        onPress: async () => {
+          setIsApplying(true);
+          try {
+            // ユーザー情報を取得
+            if (!auth.currentUser) {
+              throw new Error('ログインが必要です');
+            }
+
+            const userDoc = await getDoc(
+              doc(db, 'profiles', auth.currentUser.uid),
+            );
+            const userData = userDoc.data();
+
+            // 組織の場合は組織名、シニアの場合はニックネームまたは名前を使用
+            let applicantName = 'Unknown';
+            if (userData) {
+              if (userData.role === 'org') {
+                applicantName =
+                  userData.orgProfile?.organizationName ||
+                  userData.name ||
+                  'Unknown';
+              } else {
+                applicantName =
+                  userData.seniorProfile?.nickname ||
+                  userData.name ||
+                  'Unknown';
+              }
+            }
+
+            const applicationData: Omit<EventApplication, 'id'> = {
+              eventId: event.id,
+              applicantId: auth.currentUser!.uid,
+              applicantName: applicantName,
+              organizerId: event.organizerId,
+              status: 'pending',
+              appliedAt: Timestamp.now(),
+              updatedAt: Timestamp.now(),
+            };
+
+            await addDoc(collection(db, 'applications'), applicationData);
+            setApplicationStatus('pending');
+
+            const eventCreatorRole = event.createdByRole || 'org';
+            const successMessage =
+              eventCreatorRole === 'senior'
+                ? '申込みが完了しました。活動主催者からの連絡をお待ちください。'
+                : '申込みが完了しました。組織からの連絡をお待ちください。';
+
+            Alert.alert('申込み完了', successMessage, [{ text: 'OK' }]);
+          } catch (error) {
+            console.error('Error applying to event:', error);
+            Alert.alert(
+              'エラー',
+              '申込みに失敗しました。もう一度お試しください。',
+            );
+          } finally {
+            setIsApplying(false);
+          }
+        },
+      },
+    ]);
   };
 
   const isOwnEvent = auth.currentUser?.uid === event?.organizerId;
@@ -223,9 +337,52 @@ export default function EventDetailScreen() {
 
         {/* 申込みボタン */}
         {!isOwnEvent && (
-          <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-            <Text style={styles.applyButtonText}>このイベントに申し込む</Text>
-          </TouchableOpacity>
+          <View style={styles.applicationSection}>
+            {applicationStatus === 'pending' && (
+              <View style={styles.statusCard}>
+                <Text style={styles.statusTitle}>申込み済み</Text>
+                <Text style={styles.statusDescription}>
+                  {event.createdByRole === 'senior'
+                    ? '活動主催者からの連絡をお待ちください'
+                    : '組織からの連絡をお待ちください'}
+                </Text>
+              </View>
+            )}
+            {applicationStatus === 'approved' && (
+              <View style={[styles.statusCard, styles.approvedCard]}>
+                <Text style={[styles.statusTitle, styles.approvedText]}>
+                  申込み承認済み
+                </Text>
+                <Text style={styles.statusDescription}>
+                  おめでとうございます！参加が承認されました
+                </Text>
+              </View>
+            )}
+            {applicationStatus === 'rejected' && (
+              <View style={[styles.statusCard, styles.rejectedCard]}>
+                <Text style={[styles.statusTitle, styles.rejectedText]}>
+                  申込み不承認
+                </Text>
+                <Text style={styles.statusDescription}>
+                  今回は見送りとなりました
+                </Text>
+              </View>
+            )}
+            {!applicationStatus && (
+              <TouchableOpacity
+                style={[
+                  styles.applyButton,
+                  isApplying && styles.applyButtonDisabled,
+                ]}
+                onPress={handleApply}
+                disabled={isApplying}
+              >
+                <Text style={styles.applyButtonText}>
+                  {isApplying ? '申込み中...' : 'このイベントに申し込む'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
 
         {/* 自分のイベントの場合の管理ボタン */}
@@ -379,10 +536,49 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 40,
   },
+  applyButtonDisabled: {
+    backgroundColor: '#9ca3af',
+  },
   applyButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  applicationSection: {
+    marginTop: 24,
+    marginBottom: 40,
+  },
+  statusCard: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#fbbf24',
+  },
+  approvedCard: {
+    backgroundColor: '#ecfdf5',
+    borderLeftColor: '#10b981',
+  },
+  rejectedCard: {
+    backgroundColor: '#fef2f2',
+    borderLeftColor: '#ef4444',
+  },
+  statusTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  approvedText: {
+    color: '#059669',
+  },
+  rejectedText: {
+    color: '#dc2626',
+  },
+  statusDescription: {
+    fontSize: 14,
+    color: '#6b7280',
+    lineHeight: 20,
   },
   ownerActions: {
     alignItems: 'center',
