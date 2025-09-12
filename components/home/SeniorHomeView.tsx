@@ -230,7 +230,7 @@ const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
           <ActionCard
             title="活動を作成"
             description="新しい活動を企画・募集"
-            icon="�"
+            icon="✨"
             onPress={() => router.push('/(app)/create-event')}
             color="#3b82f6"
           />
