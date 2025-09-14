@@ -242,7 +242,6 @@ export default function MyEventsApplicationsScreen() {
           </View>
         ) : applications.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📋</Text>
             <Text style={styles.emptyTitle}>申込みがありません</Text>
             <Text style={styles.emptyDescription}>
               あなたが作成したイベントへの申込みがあると、ここに表示されます

@@ -16,6 +16,22 @@ export type ITLevel =
   | '上級レベル'
   | '不問';
 
+// Base interfaces for common fields
+export interface TimestampedEntity {
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export interface VersionedEntity {
+  version: number;
+}
+
+// Area type for consistent location handling
+export interface Area {
+  pref: string;
+  city: string;
+}
+
 export interface SeniorProfileData {
   nickname: string;
   gender: Gender;

@@ -157,7 +157,7 @@ export default function MyEventsScreen() {
           </View>
         ) : events.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📅</Text>
+            
             <Text style={styles.emptyTitle}>主催中のイベントがありません</Text>
             <Text style={styles.emptyDescription}>
               新しいイベントを作成して、興味のある組織やシニアとつながりましょう
@@ -192,7 +192,7 @@ export default function MyEventsScreen() {
 
                 <View style={styles.eventMeta}>
                   <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>📍 開催地:</Text>
+                    <Text style={styles.metaLabel}>開催地:</Text>
                     <Text style={styles.metaValue}>
                       {event.area.pref} {event.area.city}
                     </Text>
@@ -200,7 +200,7 @@ export default function MyEventsScreen() {
 
                   {event.eventDate && (
                     <View style={styles.metaRow}>
-                      <Text style={styles.metaLabel}>📅 開催日:</Text>
+                      <Text style={styles.metaLabel}>開催日:</Text>
                       <Text style={styles.metaValue}>
                         {formatDate(event.eventDate)}
                       </Text>
@@ -208,7 +208,7 @@ export default function MyEventsScreen() {
                   )}
 
                   <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>👥 対象:</Text>
+                    <Text style={styles.metaLabel}>対象:</Text>
                     <Text style={styles.metaValue}>
                       {event.targetAgeGroups.join('・')} /{' '}
                       {getGenderLabel(event.targetGender)}
@@ -216,7 +216,7 @@ export default function MyEventsScreen() {
                   </View>
 
                   <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>💻 ITレベル:</Text>
+                    <Text style={styles.metaLabel}>ITレベル:</Text>
                     <Text style={styles.metaValue}>
                       {getITLevelLabel(event.itLevel)}
                     </Text>
@@ -224,7 +224,7 @@ export default function MyEventsScreen() {
 
                   {event.requiredSkills.length > 0 && (
                     <View style={styles.metaRow}>
-                      <Text style={styles.metaLabel}>🛠 募集スキル:</Text>
+                      <Text style={styles.metaLabel}>募集スキル:</Text>
                       <Text style={styles.metaValue}>
                         {event.requiredSkills.slice(0, 3).join('・')}
                         {event.requiredSkills.length > 3 && '...'}
@@ -233,7 +233,7 @@ export default function MyEventsScreen() {
                   )}
 
                   <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>📝 投稿日:</Text>
+                    <Text style={styles.metaLabel}>投稿日:</Text>
                     <Text style={styles.metaValue}>
                       {formatCreatedDate(event.createdAt)}
                     </Text>

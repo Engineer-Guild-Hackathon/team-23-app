@@ -1,4 +1,3 @@
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { auth, db } from '@/lib/firebase';
 import {
   ApplicationStatus,
@@ -7,7 +6,7 @@ import {
   Gender,
   ITLevel,
 } from '@/lib/types';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import {
   addDoc,
   collection,
@@ -19,18 +18,10 @@ import {
   where,
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import {
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { styles } from './styles/eventDetailStyles';
 
 export default function EventDetailScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [event, setEvent] = useState<EventPost | null>(null);
@@ -61,7 +52,6 @@ export default function EventDetailScreen() {
           }
         } else {
           Alert.alert('エラー', 'イベントが見つかりません。');
-          router.back();
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -72,7 +62,7 @@ export default function EventDetailScreen() {
     };
 
     fetchEvent();
-  }, [id, router]);
+  }, [id]);
 
   const checkApplicationStatus = async (eventId: string, userId: string) => {
     try {
@@ -242,364 +232,62 @@ export default function EventDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={{ title: 'イベント詳細' }} />
 
-      {/* Top Bar with Back Button */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <IconSymbol name="arrow.left" size={20} color="#374151" />
-          <Text style={styles.backButtonText}>戻る</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-      >
-        {/* タイトルセクション */}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.titleSection}>
           <Text style={styles.title}>{event.title}</Text>
-          <View style={styles.organizationBadge}>
-            <Text style={styles.organizationName}>
-              {event.organizationName}
-            </Text>
-          </View>
-          <Text style={styles.postDate}>
-            投稿日: {formatDate(event.createdAt)}
-          </Text>
+          <Text style={styles.sub}>{event.organizationName}</Text>
+          <Text style={styles.meta}>投稿日: {formatDate(event.createdAt)}</Text>
         </View>
 
-        {/* 説明セクション */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📝 イベント説明</Text>
-          <Text style={styles.description}>{event.description}</Text>
-        </View>
+        <Text style={styles.text}>{event.description}</Text>
 
-        {/* 実施地域 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📍 実施地域</Text>
-          <Text style={styles.sectionContent}>
-            {event.area.pref} {event.area.city}
-          </Text>
-        </View>
+        <Text style={styles.meta}>
+          {event.eventDate ? `開催: ${formatDate(event.eventDate)}  ` : ''}
+          地域: {event.area.pref} {event.area.city}
+        </Text>
 
-        {/* 開催日時 */}
-        {event.eventDate && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📅 開催日時</Text>
-            <Text style={styles.sectionContent}>
-              {formatDate(event.eventDate)}
-            </Text>
-          </View>
-        )}
+        <Text style={styles.meta}>
+          対象: {event.targetAgeGroups.join('・')} / {getGenderLabel(event.targetGender)} / {getITLevelLabel(event.itLevel)}
+        </Text>
 
-        {/* 募集対象 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👥 募集対象</Text>
-          <View style={styles.targetInfo}>
-            <View style={styles.targetRow}>
-              <Text style={styles.targetLabel}>年代:</Text>
-              <Text style={styles.targetValue}>
-                {event.targetAgeGroups.join('・')}
-              </Text>
-            </View>
-            <View style={styles.targetRow}>
-              <Text style={styles.targetLabel}>性別:</Text>
-              <Text style={styles.targetValue}>
-                {getGenderLabel(event.targetGender)}
-              </Text>
-            </View>
-            <View style={styles.targetRow}>
-              <Text style={styles.targetLabel}>ITレベル:</Text>
-              <Text style={styles.targetValue}>
-                {getITLevelLabel(event.itLevel)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 募集スキル */}
         {event.requiredSkills.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🛠 募集スキル</Text>
-            <View style={styles.skillsContainer}>
-              {event.requiredSkills.map((skill, index) => (
-                <View key={index} style={styles.skillChip}>
-                  <Text style={styles.skillText}>{skill}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          <Text style={styles.meta}>スキル: {event.requiredSkills.join('、')}</Text>
         )}
 
         {/* 申込みボタン */}
         {!isOwnEvent && (
-          <View style={styles.applicationSection}>
+          <View style={styles.applyBox}>
             {applicationStatus === 'pending' && (
-              <View style={styles.statusCard}>
-                <Text style={styles.statusTitle}>申込み済み</Text>
-                <Text style={styles.statusDescription}>
-                  {event.createdByRole === 'senior'
-                    ? '活動主催者からの連絡をお待ちください'
-                    : '組織からの連絡をお待ちください'}
-                </Text>
-              </View>
+              <Text style={styles.info}>申込み済み（承認待ち）</Text>
             )}
             {applicationStatus === 'approved' && (
-              <View style={[styles.statusCard, styles.approvedCard]}>
-                <Text style={[styles.statusTitle, styles.approvedText]}>
-                  申込み承認済み
-                </Text>
-                <Text style={styles.statusDescription}>
-                  おめでとうございます！参加が承認されました
-                </Text>
-              </View>
+              <Text style={styles.success}>申込み承認済み</Text>
             )}
             {applicationStatus === 'rejected' && (
-              <View style={[styles.statusCard, styles.rejectedCard]}>
-                <Text style={[styles.statusTitle, styles.rejectedText]}>
-                  申込み不承認
-                </Text>
-                <Text style={styles.statusDescription}>
-                  今回は見送りとなりました
-                </Text>
-              </View>
+              <Text style={styles.error}>申込み不承認</Text>
             )}
             {!applicationStatus && (
-              <TouchableOpacity
-                style={[
-                  styles.applyButton,
-                  isApplying && styles.applyButtonDisabled,
-                ]}
-                onPress={handleApply}
-                disabled={isApplying}
-              >
-                <Text style={styles.applyButtonText}>
-                  {isApplying ? '申込み中...' : 'このイベントに申し込む'}
-                </Text>
-              </TouchableOpacity>
+              <View style={{ marginTop: 8 }}>
+                <TouchableOpacity
+                  onPress={handleApply}
+                  disabled={isApplying}
+                  style={[styles.applyButton, isApplying && styles.applyButtonDisabled]}
+                >
+                  <Text style={styles.applyButtonText}>
+                    {isApplying ? '申込み中...' : 'このイベントに申し込む'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
-          </View>
-        )}
+        </View>
+      )}
 
-        {/* 自分のイベントの場合の管理ボタン */}
-        {isOwnEvent && (
-          <View style={styles.ownerActions}>
-            <Text style={styles.ownerNote}>あなたが投稿したイベントです</Text>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => {
-                Alert.alert('編集', 'イベント編集機能は今後実装予定です。', [
-                  { text: 'OK' },
-                ]);
-              }}
-            >
-              <Text style={styles.editButtonText}>イベントを編集</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        {/* 自分のイベント用の未実装ボタンは削除済み */}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 44,
-    paddingVertical: 12,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '500',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingTop: 24,
-  },
-  titleSection: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 12,
-    lineHeight: 32,
-  },
-  organizationBadge: {
-    backgroundColor: '#f0f9ff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  organizationName: {
-    fontSize: 14,
-    color: '#1e40af',
-    fontWeight: '600',
-  },
-  postDate: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-  },
-  sectionContent: {
-    fontSize: 16,
-    color: '#374151',
-    lineHeight: 24,
-  },
-  description: {
-    fontSize: 16,
-    color: '#374151',
-    lineHeight: 24,
-  },
-  targetInfo: {
-    gap: 8,
-  },
-  targetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  targetLabel: {
-    fontSize: 16,
-    color: '#6b7280',
-    width: 80,
-    fontWeight: '500',
-  },
-  targetValue: {
-    fontSize: 16,
-    color: '#111827',
-    flex: 1,
-  },
-  skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  skillChip: {
-    backgroundColor: '#f3f4f6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  skillText: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '500',
-  },
-  applyButton: {
-    backgroundColor: '#4f46e5',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 40,
-  },
-  applyButtonDisabled: {
-    backgroundColor: '#9ca3af',
-  },
-  applyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  applicationSection: {
-    marginTop: 24,
-    marginBottom: 40,
-  },
-  statusCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#fbbf24',
-  },
-  approvedCard: {
-    backgroundColor: '#ecfdf5',
-    borderLeftColor: '#10b981',
-  },
-  rejectedCard: {
-    backgroundColor: '#fef2f2',
-    borderLeftColor: '#ef4444',
-  },
-  statusTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  approvedText: {
-    color: '#059669',
-  },
-  rejectedText: {
-    color: '#dc2626',
-  },
-  statusDescription: {
-    fontSize: 14,
-    color: '#6b7280',
-    lineHeight: 20,
-  },
-  ownerActions: {
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 40,
-  },
-  ownerNote: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  editButton: {
-    backgroundColor: '#059669',
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-});
+// styles imported from ./styles/eventDetailStyles

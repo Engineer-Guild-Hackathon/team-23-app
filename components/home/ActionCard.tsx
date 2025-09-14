@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 interface ActionCardProps {
   title: string;
   description?: string;
-  icon: string;
+  icon?: string; // optional: omit to hide icon
   onPress: () => void;
   color?: string;
 }
@@ -18,9 +18,11 @@ export const ActionCard: React.FC<ActionCardProps> = ({
 }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={[styles.iconContainer, { backgroundColor: color }]}>
-        <Text style={styles.icon}>{icon}</Text>
-      </View>
+      {icon ? (
+        <View style={[styles.iconContainer, { backgroundColor: color }]}>
+          <Text style={styles.icon}>{icon}</Text>
+        </View>
+      ) : null}
       <Text style={styles.title}>{title}</Text>
       {description && <Text style={styles.description}>{description}</Text>}
     </TouchableOpacity>

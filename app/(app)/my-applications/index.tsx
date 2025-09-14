@@ -126,18 +126,7 @@ export default function MyApplicationsScreen() {
     }
   };
 
-  const getStatusIcon = (status: ApplicationStatus) => {
-    switch (status) {
-      case 'pending':
-        return '⏳';
-      case 'approved':
-        return '✅';
-      case 'rejected':
-        return '❌';
-      default:
-        return '❓';
-    }
-  };
+  // 絵文字は使用しないため、ステータスアイコンは省略
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
@@ -191,7 +180,7 @@ export default function MyApplicationsScreen() {
           </View>
         ) : applications.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📋</Text>
+            
             <Text style={styles.emptyTitle}>申し込み履歴がありません</Text>
             <Text style={styles.emptyDescription}>
               興味のあるイベントに申し込んでみましょう
@@ -231,9 +220,7 @@ export default function MyApplicationsScreen() {
                       },
                     ]}
                   >
-                    <Text style={styles.statusIcon}>
-                      {getStatusIcon(application.status)}
-                    </Text>
+                    
                     <Text
                       style={[
                         styles.statusText,
@@ -247,7 +234,7 @@ export default function MyApplicationsScreen() {
 
                 {application.eventDate && (
                   <View style={styles.eventDetailsRow}>
-                    <Text style={styles.eventDetailLabel}>📅 開催日時:</Text>
+                    <Text style={styles.eventDetailLabel}>開催日時:</Text>
                     <Text style={styles.eventDetailValue}>
                       {formatEventDate(application.eventDate)}
                     </Text>
@@ -256,7 +243,7 @@ export default function MyApplicationsScreen() {
 
                 {application.eventLocation && (
                   <View style={styles.eventDetailsRow}>
-                    <Text style={styles.eventDetailLabel}>📍 場所:</Text>
+                    <Text style={styles.eventDetailLabel}>場所:</Text>
                     <Text style={styles.eventDetailValue}>
                       {application.eventLocation}
                     </Text>
@@ -268,9 +255,7 @@ export default function MyApplicationsScreen() {
                     申込み日時: {formatDate(application.appliedAt)}
                   </Text>
                   {application.status === 'approved' && (
-                    <Text style={styles.approvedNote}>
-                      🎉 参加が承認されました！
-                    </Text>
+                    <Text style={styles.approvedNote}>参加が承認されました</Text>
                   )}
                   {application.organizationResponse && (
                     <View style={styles.responseContainer}>

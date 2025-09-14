@@ -2,14 +2,13 @@ import { auth, db } from '@/lib/firebase';
 import { Profile } from '@/lib/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { signOut } from 'firebase/auth';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ActionCard } from './ActionCard';
-import { ActionGrid } from './ActionGrid';
+import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
 import { Section } from './Section';
 import { StatCard } from './StatCard';
+import { styles } from './styles/seniorHomeStyles';
 
 interface SeniorHomeViewProps {
   profile: Profile;
@@ -28,6 +27,7 @@ const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
     totalApplications: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const fetchApplicationStats = useCallback(async () => {
     if (!auth.currentUser) return;
@@ -102,30 +102,70 @@ const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
     }, [fetchApplicationStats]),
   );
 
-  const handleLogout = () => {
-    Alert.alert('ログアウト', 'ログアウトしますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: 'ログアウト',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await signOut(auth);
-            router.replace('/(auth)/login');
-          } catch (error) {
-            console.error('Logout error:', error);
-            Alert.alert('エラー', 'ログアウトに失敗しました。');
-          }
-        },
-      },
-    ]);
-  };
+  // ログアウト等のクイックアクションは非表示
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          accessibilityLabel="メニュー"
+          onPress={() => setMenuOpen((v) => !v)}
+          style={styles.burger}
+        >
+          <View style={styles.burgerLine} />
+          <View style={styles.burgerLine} />
+          <View style={styles.burgerLine} />
+        </TouchableOpacity>
+      </View>
+      {menuOpen && (
+        <View style={styles.dropdown}>
+          <Text style={styles.dropdownTitle}>メニュー</Text>
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => {
+              setMenuOpen(false);
+              router.push('/(app)');
+            }}
+          >
+            <Text style={styles.dropdownItemText}>ホーム</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => {
+              setMenuOpen(false);
+              router.push('/(app)/profile');
+            }}
+          >
+            <Text style={styles.dropdownItemText}>プロフィール</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={() => {
+              setMenuOpen(false);
+              router.push('/(app)/create-event');
+            }}
+          >
+            <Text style={styles.dropdownItemText}>イベント作成</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.dropdownItem}
+            onPress={async () => {
+              try {
+                setMenuOpen(false);
+                await signOut(auth);
+                router.replace('/(auth)/login');
+              } catch (e) {
+                // noop
+              }
+            }}
+          >
+            <Text style={styles.dropdownItemText}>ログアウト</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {/* ウェルカムセクション */}
       <View style={styles.welcomeSection}>
         <Text style={styles.greeting}>
@@ -217,202 +257,13 @@ const SeniorHomeView: React.FC<SeniorHomeViewProps> = ({ profile }) => {
         )}
       </Section>
 
-      {/* クイックアクション */}
-      <Section title="クイックアクション">
-        <ActionGrid>
-          <ActionCard
-            title="活動を探す"
-            description="あなたに合った活動を見つけましょう"
-            icon="🔍"
-            onPress={() => router.push('/(app)/events')}
-            color="#059669"
-          />
-          <ActionCard
-            title="活動を作成"
-            description="新しい活動を企画・募集"
-            icon="✨"
-            onPress={() => router.push('/(app)/create-event')}
-            color="#3b82f6"
-          />
-        </ActionGrid>
-        <View style={{ height: 8 }} />
-        <ActionGrid>
-          <ActionCard
-            title="私のイベント"
-            description="作成したイベントと申し込み管理"
-            icon="🏆"
-            onPress={() => router.push('/(app)/my-events')}
-            color="#8b5cf6"
-          />
-          <ActionCard
-            title="申し込み履歴"
-            description="過去の申し込み状況を確認"
-            icon="📋"
-            onPress={() => router.push('/(app)/my-applications')}
-            color="#f59e0b"
-          />
-        </ActionGrid>
-        <View style={{ height: 8 }} />
-        <ActionGrid>
-          <ActionCard
-            title="ログアウト"
-            description="アプリからログアウトします"
-            icon="🚪"
-            onPress={handleLogout}
-            color="#ef4444"
-          />
-        </ActionGrid>
-      </Section>
+      {/* クイックアクションを非表示にしました */}
 
-      {/* おすすめセクション */}
-      <Section title="あなたにおすすめ">
-        <View style={styles.recommendationCard}>
-          <Text style={styles.recommendationTitle}>
-            {profile.area?.city}周辺で新しい活動が始まりました！
-          </Text>
-          <Text style={styles.recommendationDescription}>
-            あなたの趣味「{profile.seniorProfile?.hobbies?.[0] || '学習'}
-            」に関連する活動があります。
-          </Text>
-          <Text style={styles.recommendationAction}>詳細を見る →</Text>
-        </View>
-      </Section>
-
-      {/* マッチング状況 */}
-      <Section title="マッチング状況">
-        <View style={styles.matchingCard}>
-          <Text style={styles.matchingTitle}>新しいマッチング</Text>
-          <Text style={styles.matchingDescription}>
-            まだマッチングはありません。プロフィールを充実させて、より多くの組織と繋がりましょう。
-          </Text>
-        </View>
-      </Section>
-
-      {/* 最近の活動 */}
-      <Section title="最近の活動">
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTitle}>活動履歴はまだありません</Text>
-          <Text style={styles.activityDescription}>
-            興味のある活動に参加して、充実したシニアライフを始めましょう。
-          </Text>
-        </View>
-      </Section>
+      {/* 未実装セクションは削除済み */}
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  contentContainer: {
-    padding: 20,
-    paddingTop: 50,
-  },
-  welcomeSection: {
-    backgroundColor: '#f0f9ff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1e40af',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#1e40af',
-    opacity: 0.8,
-  },
-  profileSummary: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    padding: 16,
-  },
-  profileRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  profileLabel: {
-    width: 80,
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  profileValue: {
-    flex: 1,
-    fontSize: 14,
-    color: '#111827',
-  },
-  recommendationCard: {
-    backgroundColor: '#fef3c7',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#f59e0b',
-  },
-  recommendationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#92400e',
-    marginBottom: 8,
-  },
-  recommendationDescription: {
-    fontSize: 14,
-    color: '#92400e',
-    marginBottom: 12,
-  },
-  recommendationAction: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#d97706',
-  },
-  matchingCard: {
-    backgroundColor: '#f0f9ff',
-    borderRadius: 12,
-    padding: 16,
-  },
-  matchingTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e40af',
-    marginBottom: 8,
-  },
-  matchingDescription: {
-    fontSize: 14,
-    color: '#1e40af',
-  },
-  activityCard: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-  },
-  activityTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  activityDescription: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    marginHorizontal: -4,
-  },
-  loadingContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-});
+// styles are imported from ./styles/seniorHomeStyles
 
 export default SeniorHomeView;

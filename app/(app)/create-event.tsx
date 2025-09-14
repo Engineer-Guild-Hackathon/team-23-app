@@ -118,6 +118,7 @@ export default function CreateEventScreen() {
   const [itLevel, setItLevel] = useState<ITLevel>('不問');
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPrefDropdown, setShowPrefDropdown] = useState(false);
 
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -302,29 +303,43 @@ export default function CreateEventScreen() {
 
           <View style={styles.field}>
             <Text style={styles.label}>都道府県 *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.chipContainer}>
-                {PREFECTURES.map((prefecture) => (
-                  <TouchableOpacity
-                    key={prefecture}
-                    style={[
-                      styles.chip,
-                      pref === prefecture && styles.chipSelected,
-                    ]}
-                    onPress={() => setPref(prefecture)}
-                  >
-                    <Text
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setShowPrefDropdown(!showPrefDropdown)}
+            >
+              <Text style={[styles.dropdownButtonText, !pref && styles.placeholder]}>
+                {pref || '都道府県を選択してください'}
+              </Text>
+              <Text style={styles.dropdownArrow}>{showPrefDropdown ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            {showPrefDropdown && (
+              <View style={styles.dropdownList}>
+                <ScrollView style={styles.dropdownScrollView}>
+                  {PREFECTURES.map((prefecture) => (
+                    <TouchableOpacity
+                      key={prefecture}
                       style={[
-                        styles.chipText,
-                        pref === prefecture && styles.chipTextSelected,
+                        styles.dropdownItem,
+                        pref === prefecture && styles.dropdownItemSelected,
                       ]}
+                      onPress={() => {
+                        setPref(prefecture);
+                        setShowPrefDropdown(false);
+                      }}
                     >
-                      {prefecture}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={[
+                          styles.dropdownItemText,
+                          pref === prefecture && styles.dropdownItemTextSelected,
+                        ]}
+                      >
+                        {prefecture}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
-            </ScrollView>
+            )}
           </View>
 
           <View style={styles.field}>
@@ -595,5 +610,61 @@ const styles = StyleSheet.create({
     color: '#4f46e5',
     fontSize: 16,
     fontWeight: '500',
+  },
+  dropdownButton: {
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  placeholder: {
+    color: '#9ca3af',
+  },
+  dropdownArrow: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  dropdownList: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    marginTop: 4,
+    maxHeight: 200,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  dropdownScrollView: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  dropdownItemSelected: {
+    backgroundColor: '#eff6ff',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  dropdownItemTextSelected: {
+    color: '#4f46e5',
+    fontWeight: '600',
   },
 });

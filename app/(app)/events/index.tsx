@@ -136,14 +136,14 @@ export default function EventsScreen() {
 
       <View style={styles.eventMeta}>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>📍 地域:</Text>
+          <Text style={styles.metaLabel}>地域:</Text>
           <Text style={styles.metaValue}>
             {event.area.pref} {event.area.city}
           </Text>
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>👥 対象:</Text>
+          <Text style={styles.metaLabel}>対象:</Text>
           <Text style={styles.metaValue}>
             {event.targetAgeGroups.join('・')} /{' '}
             {getGenderLabel(event.targetGender)}
@@ -151,13 +151,13 @@ export default function EventsScreen() {
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>💻 ITレベル:</Text>
+          <Text style={styles.metaLabel}>ITレベル:</Text>
           <Text style={styles.metaValue}>{getITLevelLabel(event.itLevel)}</Text>
         </View>
 
         {event.requiredSkills.length > 0 && (
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>🛠 募集スキル:</Text>
+            <Text style={styles.metaLabel}>募集スキル:</Text>
             <Text style={styles.metaValue}>
               {event.requiredSkills.slice(0, 3).join('・')}
               {event.requiredSkills.length > 3 && '...'}
@@ -166,7 +166,7 @@ export default function EventsScreen() {
         )}
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>📅 投稿日:</Text>
+          <Text style={styles.metaLabel}>投稿日:</Text>
           <Text style={styles.metaValue}>{formatDate(event.createdAt)}</Text>
         </View>
       </View>

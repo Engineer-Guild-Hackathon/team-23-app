@@ -215,7 +215,6 @@ export default function ApplicationsScreen() {
           </View>
         ) : applications.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📋</Text>
             <Text style={styles.emptyTitle}>申込みがありません</Text>
             <Text style={styles.emptyDescription}>
               イベントへの申込みがあると、ここに表示されます
